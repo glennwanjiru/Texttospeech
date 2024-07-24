@@ -5,6 +5,8 @@ from pydub import AudioSegment
 import pygame
 from ttkthemes import ThemedTk
 from tkinter import font as tkfont
+import os
+import uuid
 
 class TextToAudioApp:
     def __init__(self, root):
@@ -124,18 +126,28 @@ class TextToAudioApp:
         # Show progress bar
         self.progress.start()
 
-        # Convert text to speech using gTTS
-        tts = gTTS(text=text, lang='en', slow=False)
-        self.output_file = "output.mp3"
-        tts.save(self.output_file)
+        # Generate a unique filename for each conversion
+        unique_filename = f"output_{uuid.uuid4().hex}.mp3"
+        
+        try:
+            # Convert text to speech using gTTS
+            tts = gTTS(text=text, lang='en', slow=False)
+            tts.save(unique_filename)
+            
+            # Update the output file and status
+            self.output_file = unique_filename
+            self.status_label.config(text=f"Audio saved as {self.output_file}")
 
-        # Update status and enable buttons
-        self.status_label.config(text=f"Audio saved as {self.output_file}")
-        self.play_button.config(state=tk.NORMAL)
-        self.pause_button.config(state=tk.NORMAL)
-        self.stop_button.config(state=tk.NORMAL)
-        self.save_button.config(state=tk.NORMAL)
-        self.progress.stop()
+            # Enable buttons
+            self.play_button.config(state=tk.NORMAL)
+            self.pause_button.config(state=tk.NORMAL)
+            self.stop_button.config(state=tk.NORMAL)
+            self.save_button.config(state=tk.NORMAL)
+        except Exception as e:
+            messagebox.showerror("Conversion Error", f"An error occurred while converting text to audio: {e}")
+        finally:
+            # Stop the progress bar
+            self.progress.stop()
 
     def play_audio(self):
         try:
@@ -169,9 +181,13 @@ class TextToAudioApp:
         file_path = filedialog.asksaveasfilename(defaultextension=".mp3", filetypes=filetypes)
         if file_path:
             try:
-                audio = AudioSegment.from_file(self.output_file)
-                audio.export(file_path, format=self.format_var.get())
-                messagebox.showinfo("Save Success", f"Audio saved to {file_path}")
+                # Check if the output file exists before exporting
+                if os.path.exists(self.output_file):
+                    audio = AudioSegment.from_file(self.output_file)
+                    audio.export(file_path, format=self.format_var.get())
+                    messagebox.showinfo("Save Success", f"Audio saved to {file_path}")
+                else:
+                    messagebox.showerror("Save Error", "No audio file to save.")
             except Exception as e:
                 messagebox.showerror("Save Error", f"An error occurred while saving the file: {e}")
 
