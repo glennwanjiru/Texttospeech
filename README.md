@@ -1,44 +1,83 @@
 # Texttospeech App
-This application allows you to convert text to audio files (MP3, WAV, OGG) with customizable settings like speech rate, volume, and format. It provides a user-friendly interface for easy text input, format selection, playback controls, and saving options.
 
-Features:
-Convert text to speech using Google Text-to-Speech (gTTS).
-Choose the output format (MP3, WAV, OGG).
-Adjust speech rate, volume, and pitch (limited functionality with gTTS).
-Play, pause, and stop audio playback.
-Save the generated audio file to your desired location.
-Clear the text area for new conversions.
-Installation:
-Prerequisites:
+# Text to Audio Converter
 
-Python 3.x (Download from https://www.python.org/downloads/)
-Required libraries: tkinter, gtts, pydub, pygame, ttkthemes
-Using pip:
+## Overview
 
-Open a terminal or command prompt.
-Make sure you have pip installed (usually comes with Python). You can check by running python -m pip --version
-Install the required libraries using the following command:
-Bash
-pip install tkinter gtts pydub pygame ttkthemes
-Use code with caution.
+The **Text to Audio Converter** application allows users to convert text into audio files using the Google Text-to-Speech (gTTS) service. This application also supports playback controls, including play, pause, and stop, and allows users to save the generated audio in various formats.
 
-Running the application:
-Open a terminal or command prompt and navigate to the directory where you saved this Python script (TextToAudioApp.py).
-Run the script using the following command:
-Bash
-python TextToAudioApp.py
-Use code with caution.
+## Features
 
-This will launch the Text to Audio Converter application with a graphical interface.
+- Convert text to audio with customizable speech rate and volume.
+- Play, pause, and stop the generated audio.
+- Save the audio file in MP3, WAV, or OGG formats.
+- Clear the text area for new input.
 
-Using the application:
-Enter Text: Type the text you want to convert to audio in the large text area provided.
-Select Format: Choose your desired output format (MP3, WAV, OGG) from the dropdown menu.
-Adjust Settings (Optional):
-You can adjust the speech rate using the slider under "Speech Rate".
-The volume can be controlled using the slider under "Volume". (Note: Pitch adjustment has limited functionality with gTTS).
-Convert to Audio: Click the "Convert to Audio" button. The progress bar will indicate the conversion process.
-Playback and Saving:
-Once the conversion is complete, the playback controls (Play, Pause, Stop) and "Save Audio" button will become enabled.
-Use the playback controls to listen to the generated audio.
-Click "Save Audio" to choose a location and filename to save the audio file.
+## Requirements
+
+To run this application, you'll need Python installed on your system along with several libraries. You can install the required libraries using `pip`. 
+
+### Libraries
+
+- `tkinter` (for GUI components)
+- `gtts` (for text-to-speech conversion)
+- `pydub` (for audio file handling)
+- `pygame` (for audio playback)
+- `ttkthemes` (for themed widgets)
+- `uuid` (for generating unique filenames)
+- `os` (for file operations)
+
+### Installation
+
+1. Clone the repository:
+
+    ```sh
+    git clone https://github.com/glennwanjiru/Texttospeech
+    ```
+
+2. Navigate to the project directory:
+
+    ```sh
+    cd your-repository
+    ```
+
+3. Install the required Python packages:
+
+    ```sh
+    pip install gtts pydub pygame ttkthemes
+    ```
+
+4. **Optional**: Install `ffmpeg` for audio format support with `pydub`. Follow the installation instructions from [FFmpeg's official website](https://ffmpeg.org/download.html).
+
+## Usage
+
+1. Run the application:
+
+    ```sh
+    python text_to_audio_app.py
+    ```
+
+2. Enter the text you want to convert in the text area.
+
+3. Adjust the speech rate and volume using the sliders.
+
+4. Click **"Convert to Audio"** to generate the audio file.
+
+5. Use the **"Play"** button to listen to the audio, **"Pause"** to pause, and **"Stop"** to stop playback.
+
+6. Click **"Save Audio"** to save the audio file to your desired location and format.
+
+7. Use **"Clear Text"** to empty the text area for new input.
+
+## Troubleshooting
+
+- **Audio Playback Issues**: Ensure `pygame` is correctly installed and that your system's audio is functioning.
+- **File Saving Errors**: Check that the audio file exists before attempting to save and ensure you have write permissions to the chosen directory.
+
+
+
+## Contributing
+
+Feel free to fork the repository and submit pull requests. Any improvements, bug fixes, or feature additions are welcome!
+
+
