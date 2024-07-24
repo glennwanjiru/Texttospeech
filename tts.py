@@ -10,7 +10,7 @@ class TextToAudioApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Text to Audio Converter")
-        self.root.geometry("600x500")  # Set a fixed window size
+        self.root.geometry("700x600")  # Increased window size for better layout
 
         # Initialize pygame mixer
         pygame.mixer.init()
@@ -18,72 +18,101 @@ class TextToAudioApp:
         # Define font
         self.font = tkfont.Font(family="Helvetica", size=12)
 
+        # Define colors
+        self.bg_color = "#F7F7F7"
+        self.fg_color = "#333333"
+        self.button_bg_color = "#007BFF"
+        self.button_fg_color = "#FFFFFF"
+        self.button_hover_bg_color = "#0056b3"
+        self.button_hover_fg_color = "#FFFFFF"
+        self.label_bg_color = "#E0E0E0"
+        self.progress_color = "#007BFF"
+
         # Create GUI elements
         self.create_widgets()
 
+        # Initialize state variables
+        self.is_playing = False
+        self.is_paused = False
+        self.current_pos = 0
+
     def create_widgets(self):
+        # Set background color for the root window
+        self.root.configure(bg=self.bg_color)
+
         # Define styles
         style = ttk.Style(self.root)
         style.configure("TButton", font=self.font, padding=10, relief='flat')
-        style.configure("TLabel", font=self.font, padding=5)
+        style.configure("TLabel", font=self.font, padding=5, background=self.label_bg_color)
         style.configure("TCombobox", font=self.font, padding=5)
-        style.configure("TScale", background="#f0f0f0")
+        style.configure("TScale", background=self.bg_color)
+        style.configure("TProgressbar", thickness=20, troughcolor=self.bg_color, background=self.progress_color)
 
         # Text area
-        self.text_area = tk.Text(self.root, wrap=tk.WORD, height=10, width=50, bg="#f0f0f0", fg="#333333", font=self.font, bd=0, highlightthickness=0)
-        self.text_area.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+        self.text_area = tk.Text(self.root, wrap=tk.WORD, height=10, width=60, bg="#FFFFFF", fg=self.fg_color, font=self.font, bd=0, highlightthickness=0)
+        self.text_area.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
 
         # Format selection
         self.format_var = StringVar(value="mp3")
-        self.format_menu = ttk.Combobox(self.root, textvariable=self.format_var, values=["mp3", "wav", "ogg"])
-        self.format_menu.pack(pady=5, padx=10)
+        self.format_menu = ttk.Combobox(self.root, textvariable=self.format_var, values=["mp3", "wav", "ogg"], state='readonly')
+        self.format_menu.pack(pady=5, padx=20)
 
         # Rate, Volume, and Pitch controls
-        self.rate_var = tk.IntVar(value=150)
+        self.rate_var = tk.IntVar(value=200)  # Set default speech rate to 200
         self.volume_var = tk.DoubleVar(value=1.0)
         self.pitch_var = tk.IntVar(value=50)
 
-        ttk.Label(self.root, text="Speech Rate:").pack(pady=5, padx=10)
-        self.rate_slider = tk.Scale(self.root, from_=50, to_=300, variable=self.rate_var, orient='horizontal', sliderlength=30, length=300)
-        self.rate_slider.pack(pady=5, padx=10)
+        ttk.Label(self.root, text="Speech Rate:").pack(pady=5, padx=20)
+        self.rate_slider = tk.Scale(self.root, from_=50, to_=300, variable=self.rate_var, orient='horizontal', sliderlength=30, length=300, bg=self.bg_color)
+        self.rate_slider.pack(pady=5, padx=20)
 
-        ttk.Label(self.root, text="Volume:").pack(pady=5, padx=10)
-        self.volume_slider = tk.Scale(self.root, from_=0, to_=1, variable=self.volume_var, orient='horizontal', sliderlength=30, length=300, resolution=0.1)
-        self.volume_slider.pack(pady=5, padx=10)
+        ttk.Label(self.root, text="Volume:").pack(pady=5, padx=20)
+        self.volume_slider = tk.Scale(self.root, from_=0, to_=1, variable=self.volume_var, orient='horizontal', sliderlength=30, length=300, resolution=0.1, bg=self.bg_color)
+        self.volume_slider.pack(pady=5, padx=20)
 
-        ttk.Label(self.root, text="Pitch (not directly supported in gTTS):").pack(pady=5, padx=10)
-        self.pitch_slider = tk.Scale(self.root, from_=0, to_=100, variable=self.pitch_var, orient='horizontal', sliderlength=30, length=300)
-        self.pitch_slider.pack(pady=5, padx=10)
+        ttk.Label(self.root, text="Pitch (not directly supported in gTTS):").pack(pady=5, padx=20)
+        self.pitch_slider = tk.Scale(self.root, from_=0, to_=100, variable=self.pitch_var, orient='horizontal', sliderlength=30, length=300, bg=self.bg_color)
+        self.pitch_slider.pack(pady=5, padx=20)
 
         # Buttons
-        self.convert_button = ttk.Button(self.root, text="Convert to Audio", command=self.convert_to_audio)
-        self.convert_button.pack(pady=5, padx=10, fill=tk.X)
+        button_frame = ttk.Frame(self.root, style="TFrame")
+        button_frame.pack(pady=10, padx=20, fill=tk.X)
 
-        self.play_button = ttk.Button(self.root, text="Play Audio", command=self.play_audio, state=tk.DISABLED)
-        self.play_button.pack(pady=5, padx=10, fill=tk.X)
+        self.convert_button = ttk.Button(button_frame, text="Convert to Audio", command=self.convert_to_audio)
+        self.convert_button.pack(side=tk.LEFT, padx=5, expand=True)
+        self.apply_button_styles(self.convert_button)
 
-        self.save_button = ttk.Button(self.root, text="Save Audio", command=self.save_audio, state=tk.DISABLED)
-        self.save_button.pack(pady=5, padx=10, fill=tk.X)
+        self.play_button = ttk.Button(button_frame, text="Play", command=self.play_audio, state=tk.DISABLED)
+        self.play_button.pack(side=tk.LEFT, padx=5, expand=True)
+        self.apply_button_styles(self.play_button)
 
-        self.clear_button = ttk.Button(self.root, text="Clear Text", command=self.clear_text)
-        self.clear_button.pack(pady=5, padx=10, fill=tk.X)
+        self.pause_button = ttk.Button(button_frame, text="Pause", command=self.pause_audio, state=tk.DISABLED)
+        self.pause_button.pack(side=tk.LEFT, padx=5, expand=True)
+        self.apply_button_styles(self.pause_button)
 
-        self.status_label = ttk.Label(self.root, text="")
-        self.status_label.pack(pady=5, padx=10)
+        self.stop_button = ttk.Button(button_frame, text="Stop", command=self.stop_audio, state=tk.DISABLED)
+        self.stop_button.pack(side=tk.LEFT, padx=5, expand=True)
+        self.apply_button_styles(self.stop_button)
+
+        self.save_button = ttk.Button(button_frame, text="Save Audio", command=self.save_audio, state=tk.DISABLED)
+        self.save_button.pack(side=tk.LEFT, padx=5, expand=True)
+        self.apply_button_styles(self.save_button)
+
+        self.clear_button = ttk.Button(button_frame, text="Clear Text", command=self.clear_text)
+        self.clear_button.pack(side=tk.LEFT, padx=5, expand=True)
+        self.apply_button_styles(self.clear_button)
+
+        self.status_label = ttk.Label(self.root, text="", background=self.bg_color)
+        self.status_label.pack(pady=5, padx=20)
 
         # Progress Bar
         self.progress = ttk.Progressbar(self.root, length=300, mode='indeterminate')
-        self.progress.pack(pady=10, padx=10)
+        self.progress.pack(pady=10, padx=20)
 
-        # Custom styling for rounded buttons
-        self.style_button()
-
-    def style_button(self):
-        self.root.option_add('*TButton*borderWidth', 1)
-        self.root.option_add('*TButton*relief', 'flat')
-        self.root.option_add('*TButton*padding', [10, 5])
-        self.root.option_add('*TButton*background', '#007BFF')
-        self.root.option_add('*TButton*foreground', 'white')
+    def apply_button_styles(self, button):
+        button.configure(style="TButton")
+        button.bind("<Enter>", lambda e: button.configure(background=self.button_hover_bg_color, foreground=self.button_hover_fg_color))
+        button.bind("<Leave>", lambda e: button.configure(background=self.button_bg_color, foreground=self.button_fg_color))
 
     def convert_to_audio(self):
         # Get the text from the text area
@@ -103,20 +132,36 @@ class TextToAudioApp:
         # Update status and enable buttons
         self.status_label.config(text=f"Audio saved as {self.output_file}")
         self.play_button.config(state=tk.NORMAL)
+        self.pause_button.config(state=tk.NORMAL)
+        self.stop_button.config(state=tk.NORMAL)
         self.save_button.config(state=tk.NORMAL)
         self.progress.stop()
 
     def play_audio(self):
         try:
-            # Load and play the audio file
-            pygame.mixer.music.load(self.output_file)
-            pygame.mixer.music.play()
-            
-            # Wait for the music to finish playing
-            while pygame.mixer.music.get_busy():
-                pygame.time.Clock().tick(10)
+            if self.is_paused:
+                pygame.mixer.music.unpause()
+                self.is_paused = False
+                self.is_playing = True
+            else:
+                pygame.mixer.music.load(self.output_file)
+                pygame.mixer.music.play(start=self.current_pos)
+                self.is_playing = True
         except Exception as e:
             messagebox.showerror("Playback Error", f"An error occurred while playing the file: {e}")
+
+    def pause_audio(self):
+        if self.is_playing:
+            pygame.mixer.music.pause()
+            self.current_pos = pygame.mixer.music.get_pos() / 1000  # Convert milliseconds to seconds
+            self.is_paused = True
+            self.is_playing = False
+
+    def stop_audio(self):
+        pygame.mixer.music.stop()
+        self.current_pos = 0
+        self.is_playing = False
+        self.is_paused = False
 
     def save_audio(self):
         # Ask the user where to save the file
